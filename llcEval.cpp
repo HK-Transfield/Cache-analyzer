@@ -5,46 +5,50 @@
 #define KB 1024
 #define MB 1024 * 1024
 
-const int steps =  64 * 1024 * 1024; // abitrary large number of steps
-const int sizes[] = { 1 * KB, 4 * KB, 8 * KB, 16 * KB, 32 * KB, 64 * KB, 128 * KB, 192 * KB, 256 * KB, 512 * KB, 
-        1 * MB, 2 * MB, 3 * MB, 4 * MB, 5 * MB, 6 * MB, 7 * MB, 8 * MB, 9 * MB, 10 * MB, 11 * MB, 12 * MB, 13 * MB,
-        14 * MB, 15 * MB};
-
 using namespace std;
 using namespace std::chrono;
 
-void measureCache(int size, char arr[]) {
-    int lengthMod = size - 1;
-
-    for (int s = 0; s < steps; s++)
-        arr[(s * 64) & lengthMod]++; 
-}
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
+    static int *arr;
+    const unsigned int steps = 256 * 1024 * 1024; // abitrary large number of steps
+    const int sizes[] = {1 * KB, 4 * KB, 8 * KB, 16 * KB, 32 * KB, 64 * KB, 128 * KB, 192 * KB, 256 * KB, 512 * KB,
+                         1 * MB, 2 * MB, 3 * MB, 4 * MB, 8 * MB, 16 * MB, 32 * MB, 64 * MB, 128 * MB};
     int lengthMod;
-    char* arr = new char[64 * 1024 * 1024];
 
-    for(int j = 0; j < sizeof(arr); j++)
-            arr[j] = (char)1;
+    // the program creates a new array for eeach size defined
+    for (int i = 0; i < sizeof(sizes) / sizeof(int); i++)
+    {
+        arr = new int[sizes[i]];
 
-    for(int i = 0; i < sizeof(sizes)/sizeof(int); i++) {
-
-         
-        lengthMod = sizes[i] - 1;
-
-        // begin measuring access time
+        /*
+        Begin recording access times for each array size we are evaluating.
+        It will the array an arbitrary number of steps.
+        */
         auto start = high_resolution_clock::now();
 
+        // arbitrarily allocate the array
+        for (int i = 0; i < sizeof(arr) / sizeof(int); i++)
+            arr[i] = (char)1;
+
+        lengthMod = sizes[i] - 1;
+        /*
+        This for loop increments every 16th integer to modify
+        the 16 byte cache line (int = 4 bytes)
+        */
         for (int s = 0; s < steps; s++)
-            arr[(s * 64) & lengthMod]++; 
+            arr[(s * 16) & lengthMod]++;
+
         auto stop = high_resolution_clock::now();
 
         // record time
-        auto duration = duration_cast<nanoseconds>(stop - start);
+        auto duration = duration_cast<milliseconds>(stop - start);
         cout << duration.count() << endl;
+
+        delete[] arr;
     }
 
-    delete[] arr;
+    // delete[] arr;
 
     return 0;
 }
