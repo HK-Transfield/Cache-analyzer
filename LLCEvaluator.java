@@ -12,32 +12,33 @@ public class LLCEvaluator {
 
     public void testLLC() {
         int steps = 64 * 1024 * 1024; // arbitrary large number of steps
+        byte[] arr = new byte[256 * 1024 * 1024];
         int lengthMod;
         long startTime, endTime;
         Random rnd = new Random();
 
+        Arrays.fill(arr, (byte) 1);
+
         // the program creates a new array for eeach size defined
         for (int i = 0; i < sizes.length; i++) {
-            byte[] arr = new byte[sizes[i]];
+            lengthMod = sizes[i] - 1;
 
             /*
              * Begin recording access times for each array size we are evaluating. It will
              * the array an arbitrary number of steps.
              */
             startTime = System.nanoTime();
-            Arrays.fill(arr, (byte) 1);
-
-            lengthMod = arr.length - 1;
 
             // increment a random 64th byte to modify the cache line.
             // if it passes the last value if will loop back to the
             // beginning
             for (int s = 0; s < steps; s++) {
-                arr[(rnd.nextInt() * 64) & lengthMod]++;
+                arr[(s * 64) & lengthMod]++;
+                // arr[(rnd.nextInt() * 64) & lengthMod]++;
             }
             endTime = System.nanoTime();
 
-            System.out.println((endTime - startTime));
+            System.out.println(((endTime - startTime) / 1000000));
         }
     }
 }
