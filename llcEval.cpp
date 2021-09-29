@@ -10,8 +10,8 @@ using namespace std::chrono;
 
 int main(int argc, char *argv[])
 {
-    static int *arr;
-    const unsigned int steps = 256 * 1024 * 1024; // abitrary large number of steps
+    static char *arr = new char[256 * 1024 * 1024]();
+    const unsigned int steps = 64 * 1024 * 1024; // abitrary large number of steps
     const int sizes[] = {1 * KB, 4 * KB, 8 * KB, 16 * KB, 32 * KB, 64 * KB, 128 * KB, 192 * KB, 256 * KB, 512 * KB,
                          1 * MB, 2 * MB, 3 * MB, 4 * MB, 8 * MB, 16 * MB, 32 * MB, 64 * MB, 128 * MB};
     int lengthMod;
@@ -19,17 +19,11 @@ int main(int argc, char *argv[])
     // the program creates a new array for eeach size defined
     for (int i = 0; i < sizeof(sizes) / sizeof(int); i++)
     {
-        arr = new int[sizes[i]];
-
         /*
         Begin recording access times for each array size we are evaluating.
         It will the array an arbitrary number of steps.
         */
         auto start = high_resolution_clock::now();
-
-        // arbitrarily allocate the array
-        for (int i = 0; i < sizeof(arr) / sizeof(int); i++)
-            arr[i] = (char)1;
 
         lengthMod = sizes[i] - 1;
         /*
@@ -37,18 +31,16 @@ int main(int argc, char *argv[])
         the 16 byte cache line (int = 4 bytes)
         */
         for (int s = 0; s < steps; s++)
-            arr[(s * 16) & lengthMod]++;
+            arr[(s * 64) & lengthMod]++;
 
         auto stop = high_resolution_clock::now();
 
         // record time
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto duration = duration_cast<nanoseconds>(stop - start);
         cout << duration.count() << endl;
-
-        delete[] arr;
     }
 
-    // delete[] arr;
+    delete[] arr;
 
     return 0;
 }

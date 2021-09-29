@@ -38,7 +38,7 @@ public class LLCEvaluator {
             }
             endTime = System.nanoTime();
 
-            System.out.println(((endTime - startTime) / 1000000));
+            System.out.println(((endTime - startTime)));
         }
     }
 }
