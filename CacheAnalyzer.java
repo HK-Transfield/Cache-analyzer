@@ -5,7 +5,7 @@ import java.util.Random;
  * Simple algorithm used to infer the size of the last level cache. Inspired by
  * the algorithm described by Igor Otrosky
  * 
- * @author Harmon Transfield, 1317381
+ * @author HK Transfield
  */
 class CacheTimer {
     final int AVERAGE = 50;
